@@ -170,12 +170,11 @@ if __name__ == '__main__':
     print(model)
 
     positions = torch.ones(8, 3, dtype=torch.int)
-
     features = torch.randn(8, 1, 1, 7, 365, 14)
-
     targets = torch.randn(8, 365, 1)
 
     output = model(positions, features)
 
-    print(output.size())
-    print(output.size())
+    assert output.size() == targets.size()
+    
+    print('Output shape is correct')

@@ -114,15 +114,16 @@ model = SpatioTemporalModel(
     lat_size=train_dataset.nlatitudes,
     lon_size=train_dataset.nlongitudes,
     depth_size=train_dataset.ndepths,
-)
+).to("cuda" if use_cuda else "cpu")
 
 print(model)
 
+# Unfortunatly, the DCE does not currently support PyTorch 2.0  which requires Cuda 11.7
 # model = torch.compile(model)
 
 lightning_model = LightningBase(
     model
-)
+).to("cuda" if use_cuda else "cpu")
 
 # Callbacks
 
