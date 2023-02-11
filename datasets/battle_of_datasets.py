@@ -203,5 +203,5 @@ print("3x3 neighborhood Benchmark Passed")
 # No neighborhood Benchmark Passed
 
 # memmap loader time:  20.68733835220337
-# array loader time:  26.191723108291626
+# array loader time:  26.191723108291626 # the difference gets bigger with larger neighborhoods and larger batch sizes
 # 3x3x3 neighborhood Benchmark Passed

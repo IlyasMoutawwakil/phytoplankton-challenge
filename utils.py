@@ -1,3 +1,4 @@
+import os
 import torch
 from tqdm.auto import tqdm
 
@@ -8,6 +9,9 @@ def create_submission(experiment_name, model, loader, step_days=10):
     num_days_test = loader.dataset.ntimes
 
     chunk_size = batch_size * num_days_test
+
+    if not os.path.exists("submissions/"):
+        os.makedirs("submissions/")
 
     csv_submission = open(f"submissions/{experiment_name}.csv", "w")
     csv_submission.write("Id,Predicted\n")

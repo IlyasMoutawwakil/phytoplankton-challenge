@@ -1,8 +1,8 @@
-# phytoplankton-prediction
+# Phytoplankton Challenge
 
 Our winning code solution for the phytoplankton kaggle competition.
 
-## Structure
+## Structure & Documentation
 
 The code is structured as follows:
 
@@ -16,6 +16,8 @@ The code is structured as follows:
   - `array_dataset.py` contains the `ArraySpatioTemporalDataset` class, which is a dataset that loads data from the binary data file and stores it in an `np.array`. This dataset is used for the spatio-temporal case and can only be used with a number of workers equal to 0 (no multiprocessing).
 
   - `memmap_dataset.py` contains the `MemmapSpatioTemporalDataset` class, which is a dataset that loads data from the binary data file and stores it in an `np.memmap`. This dataset is used for the spatio-temporal case and can be accelerated by using multiple workers depending on the number of cores available.
+  
+  Datasets return a *random cut* from the time series in the training set (a time series for each point) which helped in augmenting the data, regularizing the model and thus preventing overfitting to some degree.
 
   - `battle_of_datasets.py` contains a test script that verifies the conformity of outputs and compares the performance of the three datasets.
 
@@ -29,7 +31,9 @@ The code is structured as follows:
 
 - `checkpoints/` contains the checkpoints of the model. It will be created when training the model.
 
-- `submission/` contains the submission file. It will be created in when testing.
+- `submissions/` contains the submission files. It will be created in when testing.
+
+- `debug.ipynb` contains a notebook for debugging the model's predictions.
 
 - `requirements.txt` contains the required python packages for a fully functional DCE environment with no conflicts.
 
@@ -53,25 +57,49 @@ if you encounter any problems with the installation of the `torch` package, you 
 pip install torch --pre --extra-index-url https://download.pytorch.org/whl/nightly/cu116 --force
 ```
 
-Then, download the data files from the competition and extract them in the `data/` directory. The data files are not included in this repository because of their size and (probably) their licence.
+Then, download the data files from the competition and extract them in the `data/` directory or have them somewhere on your machine (PATH_TO_TRAINING_SET, PATH_TO_TEST_SET). The data files are not included in this repository because of their size and (probably) their licence.
 
 To train the model, run:
 
 ```bash
-python main.py --train
+python3 main.py train --train_path PATH_TO_TRAINING_SET
 ```
 
 To create a submission file, run:
 
 ```bash
-python main.py --test
+python3 main.py test --modelpath PATH_TO_CHECKPOINT --test_path PATH_TO_TEST_SET 
 ```
 
-To train and validate the model, run:
+To recieve additional information, run:
 
 ```bash
-python main.py --train --test
+python3 main.py --help
 ```
+
+The possible arrguments are as follows:
+- Possible commands: `train` and `test`.
+- Optional arguments:
+  - `-h`, `--help`: show help message and exit.
+  - `--train_path`: the path to the training set (.nc.bin file), default is `/mounts/Datasets3/2022-ChallengePlankton/sub_2CMEMS-MEDSEA-2010-2016-training.nc.bin`.
+  - `--test_path`: the path to the test set (.nc.bin file), default is `/mounts/Datasets3/2022-ChallengePlankton/sub_2CMEMS-MEDSEA-2017-testing.nc.bin`.
+  - `--modelpath`: the model of the path to use to generate predictions on the test set.
+  - `--step_days`: The step in days for the submission, default is 10.
+  - `--nthreads`: The number of threads to use for loading the data, default is 7.
+  - `--num_epochs`: The number of epochs to train for, default is 200.
+  - `--batch_size`: The size of a minibatch", default is 64.
+  - `--train_interval_length`: The interval length (number of days) to use for training, default is 365.
+  - `--valid_interval_length`: The interval length (number of days) to use for validation (365 means 2016 is used for validation, 0 means training on all the data), default is 0.
+  - `--resume_from_checkpoint`: The path of the ckpt file to resume from, default is None.
+  - `--num_cnn_layers`: The number of CNN layers for the spatiotemporal model, default is 3.
+  - `--num_lstm_layers`: The number of bidirectional LSTM layers for the spatiotemporal model, default is 2.
+  - `--num_fc_layers`: The number of fully connected layers after the LSTM, default is 4.
+  - `--hidden_size`: The hidden size of both CNN and LSTM, default is 128.
+  - `--with_position_embedding`: An integer variable that takes 1 to use positional embedding and 0 to not use it, default is 1.
+  - `--lat_neighborhood_size`: The latitude neighborhood size, default is 1.
+  - `--lon_neighborhood_size`: The longitude neighborhood size, default is 1.
+  - `--depth_neighborhood_size`: The depth neighborhood size, default is 9.
+
 
 When training, the model will be saved in the `checkpoints/` directory and the tensorboard logs will be saved in the `logs/` directory.
 
@@ -83,8 +111,10 @@ tensorboard --logdir logs/
 
 ## Results
 
-Our winning model had a configuration : 1x1x7 neighborhood, 3 CNNs, 2 LSTMs, 4 FCs, with position embedding.
+Our winning model had a configuration : 1x1x9 neighborhood, 3 CNNs, 2 LSTMs, 4 FCs, with position embedding.
 
-It was trained for 200 epochs with a batch size of 128. The model was trained on a single NVIDIA GeForce RTX 2080 Ti GPU which took less than 2 hours.
+It was trained for 200 epochs with a batch size of 64. The model was trained on a single NVIDIA GeForce RTX 2080 Ti GPU which took a little more than 2 hours (that was before using `MemmapSpatioTemporalDataset` which accelerated training for even faster experimentation).
 
-The model achieved a score of 0.015 on the private leaderboard and 0.014 on the public leaderboard.
+Its tensorboad logs are in the `logs/cnn_lstm_3_2_4_128_1_1_9_with_position_embedding/` folder.
+
+The model achieved a score of 0.01500 on the public leaderboard and 0.01494 on the private leaderboard.
