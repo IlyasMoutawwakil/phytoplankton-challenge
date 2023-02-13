@@ -46,8 +46,8 @@ The code is structured as follows:
 First, create a virtual environment and install the required packages:
 
 ```bash
-python3 -m venv venv
-source venv/bin/activate
+python3 -m venv phyto-venv
+source phyto-venv/bin/activate
 cat requirements.txt | xargs -n 1 pip install
 ```
 
