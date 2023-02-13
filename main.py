@@ -118,4 +118,11 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    eval(f"{args.command}(args)")
+    if args.command == "train":
+        train(args)
+    
+    elif args.command == "test":
+        test(args)
+    
+    else:
+        raise ValueError("Unknown command")

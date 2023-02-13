@@ -53,7 +53,13 @@ def train(args):
         str(depth_neghborhood_size) + "_" +\
         with_position_embedding_str
 
-    ckpt = args.resume_from_checkpoint
+    if os.path.exists(f"checkpoints/{experiment_name}/"):
+        print(
+            f"Experiment {experiment_name} already exists, resuming training")
+        ckpt = torch.load(f"checkpoints/{experiment_name}/last.ckpt")
+    else:
+        print(f"Starting new experiment {experiment_name}")
+        ckpt = None
 
     train_dataset = MemMapSpatioTemporalDataset(
         bin_path=train_path,
@@ -84,7 +90,6 @@ def train(args):
         num_workers=num_workers,
         pin_memory=use_cuda,
     )
-
     valid_loader = torch.utils.data.DataLoader(
         valid_dataset,
         batch_size=batch_size,
@@ -92,6 +97,7 @@ def train(args):
         num_workers=num_workers,
         pin_memory=use_cuda,
     )
+
     # Model
 
     model = SpatioTemporalModel(
@@ -171,35 +177,23 @@ def test(args):
     batch_size = args.batch_size
     num_workers = args.num_epochs
 
-    # Model Architecture
-
-    num_cnn_layers = args.num_cnn_layers
-    num_lstm_layers = args.num_lstm_layers
-    num_fc_layers = args.num_fc_layers
-    hidden_size = args.hidden_size
-
-    # defines the dimensions of the neighborhood
-    # a neghborhood of size 1 means that the axis is not considered.
-    # preferably, the neighborhood size should be odd
-    lat_neghborhood_size = args.lat_neighborhood_size
-    lon_neghborhood_size = args.lon_neighborhood_size
-    depth_neghborhood_size = args.depth_neighborhood_size
-
-    with_position_embedding = bool(args.with_position_embedding)
-    with_position_embedding_str = 'with_position_embedding' if with_position_embedding else 'without_position_embedding'
-
-    experiment_name = "spatio_temporal_model_" + \
-        str(num_cnn_layers) + "_" +\
-        str(num_lstm_layers) + "_" +\
-        str(num_fc_layers) + "_" + \
-        str(hidden_size) + "_" + \
-        str(lat_neghborhood_size) + "_" +\
-        str(lon_neghborhood_size) + "_" +\
-        str(depth_neghborhood_size) + "_" +\
-        with_position_embedding_str
+    # Parse architecture from checkpoint path
 
     ckpt = args.model_path
 
+    experiment_name = ckpt.split('/')[-1]
+
+    (num_cnn_layers, num_lstm_layers, num_fc_layers, hidden_size,
+     lat_neghborhood_size, lon_neghborhood_size, depth_neghborhood_size) = experiment_name.split(
+        '/')[-1].split('_')[3:-3]
+
+    if 'with_position_embedding' in experiment_name:
+        with_position_embedding = True
+    else:
+        with_position_embedding = False
+
+    # Testing Datasets
+    
     test_dataset = MemMapSpatioTemporalDataset(
         bin_path=test_path,
         train=False,
