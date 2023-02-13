@@ -68,7 +68,7 @@ python3 main.py train --train_path PATH_TO_TRAINING_SET
 To create a submission file, run:
 
 ```bash
-python3 main.py test --modelpath PATH_TO_CHECKPOINT --test_path PATH_TO_TEST_SET 
+python3 main.py test --model_path PATH_TO_CHECKPOINT --test_path PATH_TO_TEST_SET 
 ```
 
 To recieve additional information, run:
@@ -81,25 +81,28 @@ The possible arrguments are as follows:
 - Possible commands: `train` and `test`.
 - Optional arguments:
   - `-h`, `--help`: show help message and exit.
-  - `--train_path`: the path to the training set (.nc.bin file), default is `/mounts/Datasets3/2022-ChallengePlankton/sub_2CMEMS-MEDSEA-2010-2016-training.nc.bin`.
-  - `--test_path`: the path to the test set (.nc.bin file), default is `/mounts/Datasets3/2022-ChallengePlankton/sub_2CMEMS-MEDSEA-2017-testing.nc.bin`.
-  - `--modelpath`: the model of the path to use to generate predictions on the test set.
-  - `--step_days`: The step in days for the submission, default is 10.
-  - `--nthreads`: The number of threads to use for loading the data, default is 7.
+  
+  - `--train_path`: the path to the training set, default is `/mounts/Datasets3/2022-ChallengePlankton/sub_2CMEMS-MEDSEA-2010-2016-training.nc.bin`.
+  - `--num_workers`: The number of workers to use for loading the data, default is 7.
   - `--num_epochs`: The number of epochs to train for, default is 200.
   - `--batch_size`: The size of a minibatch", default is 64.
   - `--train_interval_length`: The interval length (number of days) to use for training, default is 365.
   - `--valid_interval_length`: The interval length (number of days) to use for validation (365 means 2016 is used for validation, 0 means training on all the data), default is 0.
-  - `--resume_from_checkpoint`: The path of the ckpt file to resume from, default is None.
+  
   - `--num_cnn_layers`: The number of CNN layers for the spatiotemporal model, default is 3.
   - `--num_lstm_layers`: The number of bidirectional LSTM layers for the spatiotemporal model, default is 2.
   - `--num_fc_layers`: The number of fully connected layers after the LSTM, default is 4.
   - `--hidden_size`: The hidden size of both CNN and LSTM, default is 128.
+  
   - `--with_position_embedding`: An integer variable that takes 1 to use positional embedding and 0 to not use it, default is 1.
+  
   - `--lat_neighborhood_size`: The latitude neighborhood size, default is 1.
   - `--lon_neighborhood_size`: The longitude neighborhood size, default is 1.
   - `--depth_neighborhood_size`: The depth neighborhood size, default is 9.
 
+  - `--test_path`: the path to the test set, default is `/mounts/Datasets3/2022-ChallengePlankton/sub_2CMEMS-MEDSEA-2017-testing.nc.bin`.
+  - `--model_path`: the model of the path to use to generate predictions on the test set.
+  - `--step_days`: The step in days for the submission, default is 10.
 
 When training, the model will be saved in the `checkpoints/` directory and the tensorboard logs will be saved in the `logs/` directory.
 
